@@ -51,6 +51,18 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
             name: "get_price",
             description: "Get price by SKU",
             inputSchema: { type: "object", properties: { sku: { type: "string" } }, required: ["sku"] }
+        },
+        {
+            name: "search_products",
+            description: "Search products by query (q) and return matches with SKU",
+            inputSchema: {
+                type: "object",
+                properties: {
+                    q: { type: "string" },
+                    k: { type: "number" }
+                },
+                required: ["q"]
+            }
         }
     ]
 }))
@@ -76,6 +88,16 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
             const sku = args.sku
             if (!sku) throw new Error("Missing argument: sku")
             const data = await httpGetJson(`${BASE_URL}/prices/${encodeURIComponent(sku)}`)
+            return { content: [{ type: "text", text: JSON.stringify(data) }] }
+        }
+
+        if (name === "search_products") {
+            const q = args.q
+            const k = args.k ?? 5
+            if (!q) throw new Error("Missing argument: q")
+
+            const url = `${BASE_URL}/search?q=${encodeURIComponent(q)}&k=${encodeURIComponent(k)}`
+            const data = await httpGetJson(url)
             return { content: [{ type: "text", text: JSON.stringify(data) }] }
         }
 
