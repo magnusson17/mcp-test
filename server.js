@@ -39,6 +39,7 @@ const mcp = new Server(
     { capabilities: { tools: {} } }
 )
 
+// dichiaro/descrivo i tools disponibili per l'agent
 mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
         { name: "ping_bridge", description: "Call /ping", inputSchema: { type: "object", properties: {} } },
@@ -67,6 +68,7 @@ mcp.setRequestHandler(ListToolsRequestSchema, async () => ({
     ]
 }))
 
+// eseguo la logica dei tools quando l'agente li chiama
 mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
     const name = req.params.name
     const args = req.params.arguments ?? {}
@@ -112,6 +114,15 @@ mcp.setRequestHandler(CallToolRequestSchema, async (req) => {
 })
 
 // ---- Streamable HTTP transport wiring (stateful sessions) ----
+
+/**
+ * http è stateful, ogni call è a se stante, dopo ogni call si scorda la conversazione
+ * per mantenere la conversazione attiva tra agent e mcp uso il transports
+ *      - se la conversazione non è ancora stata aperta la inizializzo con isInitialize
+ *      - se la conversazione è aperta ne tengo traccia con transport.handleRequest(req, res, req.body)
+ *      - altrimenti ritorno 400
+ */
+
 const SESSION_HEADER = "mcp-session-id"
 const transports = new Map() // sessionId -> transport
 
