@@ -1,3 +1,4 @@
+// non uso import "dotenv/config" perchè in locale non funziona e non ho .env
 import express from "express"
 import { randomUUID } from "node:crypto"
 
@@ -12,10 +13,7 @@ import {
 const PORT = process.env.PORT || 3000
 const BASE_URL = process.env.BASE_URL // e.g. https://yourdomain/.../endpoint-REST
 
-if (!BASE_URL) {
-    console.error("Missing BASE_URL env var")
-    process.exit(1)
-}
+if (!BASE_URL) throw new Error("Missing BASE_URL in .env")
 
 async function httpGetJson(url) {
     const res = await fetch(url)
